@@ -1,0 +1,647 @@
+---
+title: "Stat 467-Recitation 3"
+author: "Ozancan Ozdemir"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Introduction
+
+
+[Here](https://open.spotify.com/track/06wDTcGK2FxVvH45bak69Z?si=67230a3018de43ba) is a song to make you in a good mood. 
+
+
+During this semester, we'll use R Studio and related tools such as R Markdown etc. for the lab sessions. However, you should install R Programming to your computer before installing R Studio and its relates. 
+
+**Install R and R Studio**
+
+In order to install R, please visit [cran.r-project.org](cran.r-project.org). Note that you must firstly install R before installing R Studio as mentioned previously. 
+
+After installing R, please visit [https://rstudio.com/](https://rstudio.com/).
+
+The installation procedures for both are the same. Download setup file being appropriate for your operating system, then click on **next**, **next**, **next** and **finish.** 
+
+In order to find out how to use R and R Studio well, you can visit [my web pages](https://ozancanozdemir.github.io). Besides, you can find out a tutorial for preparing class report via R Markdown from [this page](https://ozancanozdemir.github.io/markdownforclassreports.pdf)
+
+**Installing package and Call it**
+
+R is an open-source software so that you can find a package for almost every procedure from drawing a graph to even designing your game for playing. That's why it is essential to know how to install such packages to our computer and how to use them. 
+
+The packages being not available in your R library collection are installed by typing ```install.packages()``` on the console frame. This function takes the name of the package as input. You can install more than one package at the same time by combining the package names through `c` function.  
+
+After installing the library, you need to call it using  ```library()```  command on your console. 
+For example;
+
+```
+install.packages("TSA")
+library(TSA)
+``` 
+
+Before going to next step, please install ```MVA```, ```lattice```, ```ggplot2```, ```GGally```, ```scatterplot3d```, ```corrplot```, ```aplpack``` packages and their dependencies to your computer.
+
+
+```install.packages(c(MVA, lattice, ggplot2, GGally, scatterplot3d, corrplot, aplpack))```
+
+## Matrix in R
+
+```{r,echo=FALSE}
+knitr::include_graphics("https://i.redd.it/wv66kkut2fu31.jpg")
+```
+
+
+### Creating a Matrix in R
+
+```matrix``` function turns 1D arrays created by `c` function 
+Create the following matrices in R. 
+
+$$ A = \left( \begin{matrix} 2 & 3 & 1 \\ 5 & 3 & 2 \\ 2 & 4 & 10 \end{matrix} \right) $$
+
+and
+
+$$ B = \left( \begin{matrix} 2 & 1 & 0 \\ 7 & 6 & 1 \\ 5 & 4 & 8 \end{matrix} \right) $$
+
+
+```{r}
+A<-matrix(c(2,5,2,3,3,4,1,2,10),nrow = 3)
+A
+```
+
+```{r}
+B<-matrix(c(2,7,5,1,6,4,0,1,8),nrow = 3)
+B
+```
+
+Extract the first row of the matrix of $A$
+
+```{r}
+A[1,]
+```
+
+Extract the third column of the matrix of $B$
+
+```{r}
+B[,3]
+```
+
+
+Extract the entry on the 1st row and 2nd column of the matrix $A$.
+
+```{r}
+A[1,2]
+```
+
+You can assign extract your elements from the matrix by using column names and the row names if your matrix has a column & row name. For example, we have a matrix called `puan_durumu`.
+
+```{r,echo=FALSE}
+puan_durumu <- matrix(c(8,8,8,8,7,6,0,1,1,0,0,1),nrow = 3)
+colnames(puan_durumu) = c("Game","Win","Draw","Lose")
+rownames(puan_durumu) = c("Galatasaray","Fenerbahce","Besiktas")
+puan_durumu
+```
+
+```{r}
+puan_durumu["Galatasaray","Win"]
+```
+
+
+**Some Special Matrices**
+
+
++ **Diagonal Matrix**
+
+If you have a vector that contains the elements or the
+entries of a diagonal matrix, you can create a diagonal matrix with the R command
+```diag.``` Study the following examples.
+
+```{r}
+a = 1:5
+diag(a) # Gives a square matrix with diagonal entries a.
+```
+
+```{r}
+diag(11:20)
+```
+
+
+```{r}
+diag(1,5) # Command format is diag(x,nrow,ncol). Here nrow=5.
+```
+
+```{r}
+diag(1:2,4,5) # No longer a square matrix.
+```
+
++ **Upper and lower diagonal matrices**
+
+```{r}
+a = matrix(1:36,6)
+a
+```
+
+```{r}
+lower.tri(a, diag = FALSE) # TRUEs NOT lower triangular as in notes.
+```
+
+```{r}
+lower.tri(a, diag = TRUE) # TRUEs now lower triangular as in notes.
+```
+
+```{r}
+upper.tri(a, diag = TRUE)
+```
+
+### Matrix Operators 
+
+Checking the dimension of a matrix (number of rows and columns) can be done using
+the command ```dim.```
+
+```{r}
+dim(A)
+```
+
+```{r}
+dim(B)
+```
+
+
+**Matrix Summation and Substraction**
+
+We use **+** for summation and **-** for substraction.
+
+```{r}
+A+B
+```
+
+```{r}
+A-B
+```
+
+
+**Matrix Multiplication**
+
+The column number of first matrix has to be equal to the row number of the second matrix.
+
+```{r}
+D = A %*% B # Matrix multiplication.
+D # Note the dimension of D.
+```
+
+
+**Transpose of Matrix** 
+
+Transpose of $A$=$A^{T}$
+
+```{r}
+t(A)
+```
+
+
+**Determinant of Matrix**
+
+Determinant of $A$=$det(A)=|A|$
+
+```{r}
+det(A)
+```
+
+**Rank of Matrix**
+
+The maximum number of linearly independent number of row or column. You can use either a package or the following function.  
+
+```{r}
+qr(A)$rank
+```
+
+
+**Inverse of Matrix**
+
+Transpose of $A$=$A^{-1}$
+
+There are many functions from several packages to calculate the inverse of any matrix in R. Among them,```solve``` is a base function in R.
+
+```{r}
+solve(A)
+```
+
+
+**Eigenvalues and Eigenvectors**
+
+In R, the eigenvalues and eigenvectors of **a square matrix** $A$ is given by ```eigen(A)```. The output of the function is a list, with components values containing eigenvalues and vectors containing eigenvectors as columns of an eigenmatrix. Run the following:
+
+```{r}
+ev=eigen(A)
+ev#both eigenvales and eigenvectors
+```
+
+```{r}
+ev$values # Gives eigen values.
+```
+
+```{r}
+ev$vectors # Gives eigen vectors as a matrix.
+```
+
+```{r}
+sum(diag(A)) # trace(B).
+```
+
+**Square root or inverse of symmetric matrix**
+Using the notation in the previous section, square root of $A (denoted $A^{1/2}$)
+
+$$
+\mathbf{A}^{\frac{1}{2}}=\mathbf{\Gamma} \mathbf{\Lambda}^{\frac{1}{2}} \boldsymbol{\Gamma}^{\prime}
+$$
+For example
+
+```{r}
+A = matrix(c(2,1,1,1,4,1,1,1,2),3)
+A
+```
+
+```{r}
+C = eigen(A)$vectors
+D.sqrt = diag(sqrt(eigen(A)$values))
+D.sqrt
+A.sqrt = C %*% D.sqrt %*% t(C) # Square root of matrix A.
+A.sqrt 
+```
+
+```{r}
+A.sqrt %*% A.sqrt # Gives A.
+```
+
+**For a symmetric matrix A, the eigenvectors are both column and row orthogonal.**
+
+```{r}
+
+C=eigen(A)$vectors # Gives eigen-vectors of A.
+D=diag(eigen(A)$values) # Diagonal matrix of eigen-values.
+C
+D
+```
+
+
+```{r}
+t(C)%*%C # Is matrix C an orthogonal matrix?
+round(t(C)%*%C,3) # Easier to see what is going on!
+
+```
+
+```{r}
+C%*%t(C) # Try round(C%*%t(C),3)
+C%*%D%*%t(C) # Matrix A.
+A
+```
+
+
+
+**Singular value decomposition (SVD)**
+
+Consider a general rectangular matrix A of size nxp where $(n > p)$ and of rank $k$, where $k < p$.
+The singular value decomposition in R can be done using the function ```svd()```. For big data,
+it is usually better to use a different function called ```La.svd()```.
+
+```{r}
+A
+```
+
+
+```{r}
+Asvd = svd(A)
+Asvd
+```
+
+
+#### Exercise 
+
+*Please create the given M and N matrices below.* 
+
+$$ M = \left( \begin{matrix} 7 & 8 & 2 \\ 5 & 9 & 1 \\ 4 & 6 & 5 \end{matrix} \right) $$
+
+and
+
+$$ N = \left( \begin{matrix} 1 & 1 & 3 \\ 5 & 2 & 6 \\ -2 & -1 & -3 \end{matrix} \right) $$
+```{r m1, exercise=TRUE}
+
+```
+
+**Decide M is positive definite or not.**
+
+```{r m2, exercise=TRUE}
+
+```
+
+**What is the rank of the matrix N?**
+
+
+**Calculate the following expressions**
+
+$M+N$
+
+$M*N$
+
+$M/N$
+
+
+```{r m3, exercise=TRUE}
+
+```
+
+**Determine M and N are invertible or not**
+
+
+```{r m4, exercise=TRUE}
+
+```
+
+**Calculate the inverse of M and N, if they exist.**
+
+
+```{r m5, exercise=TRUE}
+
+```
+
+**Combine these two matrices columnwise, then extract**
+
++ $1^{st}$ column
+
++ $2^{nd} \text{and} 3^{rd}$ rows
+
++ $3^{rd}$ column and $2^{nd}$ row.
+
+```{r m6, exercise=TRUE}
+
+```
+
+##  Descriptive Analysis in Multivariate Data
+
+A descriptive analysis is the one of the simplest and effective way to know and introduce the data under the study. The descriptive analysis can be categorized into two parts;
+
++ Numerical Methods
+
++ Graphical Methods
+
+
+Numerical methods includes mean, variance-covariance matrix in multivariate case etc. In addition to this, graphical methods includes histogram, bar plot, 2D or 3D scatter plot(3D for multivariate case), mosaic plot etc.
+
+
+**Example 1**
+
+Consider USArrests dataset from ```MVA``` package.
+
+This data set contains statistics, in arrests per 100,000 residents for assault, murder, and rape in each of the 50 US states in 1973.  Also given is the percent of the population living in urban areas.
+
+Show the first six observations. 
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+library(MVA)
+data(USArrests)
+knitr::kable(head(USArrests))
+```
+
+```{r}
+dim(USArrests)
+```
+
+A data frame with 50 observations on 4 variables.
+
+
+Obtain mean vector $\mu$ and variance-covariance matrix $\Sigma$ and correlation matrix $\rho$ of the dataset.
+
+```{r}
+colMeans(USArrests) #obtain mean vector
+```
+
+```{r}
+var(USArrests) #obtain var-cov matrix 
+```
+
+```{r}
+cor(USArrests) #obtain correlation matrix
+```
+
+You should also use ```summary``` command to obtain other descriptive statistics.
+
+```{r}
+summary(USArrests)
+```
+
+**Question** How to interpret? 
+
+In addition to the numerical methods, during the last two decades, a wide variety of new methods for displaying data graphically have been developed.These will hunt for special effects in data, indicate outliers, identify patterns, diagnose models, and generally search for novel and perhaps unexpected phenomena. 
+
+Graphical displays should aim to tell a story about the data and to reduce the cognitive effort required to make comparisons. Large numbers of graphs might be required to achieve these goals, and computers are generally needed to supply them for the same reasons that they are used for numerical analyses, namely that they
+are fast and accurate.
+
+**You can use the graphical analysis tools for univariate case such as drawing histogram or box-plot. If you represent more that one variable in your figure, the created graph becomes a tool for multivariate case.**
+
+Note that both base and ggplot2 versions are given for the plot types explaining below. 
+
+#### Scatterplots, pairwise scatterplots (draftsman plots)
+
+Scatter plots should already be familiar as a means of exploring the relationship between two variables.
+
+
+```{r}
+attach(USArrests)
+plot(Assault,Murder)
+par(las = 1) ## Horizontal axis units on y axis
+```
+
+```{r}
+plot(Assault,Murder, main = "Scatter plot", pch = 16)
+```
+
+```{r}
+library(ggplot2)
+ggplot(USArrests,aes(x = Assault, y= Murder))+geom_point()
+```
+
+
+There is a positive relationship between Murder and Assault. However, Is this plot enough?
+
+We have more than two variables of interest. A set of pairwise scatter plots (sometimes called a draftsman plot) may be of use:
+
+```{r}
+pairs(USArrests, pch = 16) #pch is point type
+```
+
+```{r}
+GGally::ggpairs(USArrests)
+```
+
+
+There other useful functions available. For example what does splom do? (Look up >?splom).
+
+```{r,warning=FALSE,message=F}
+library(lattice)
+splom(~USArrests)
+```
+
+
+You can also visualize 3d scatter plot in R using ```scatterplot3d```. While doing this,please consider three variables which are related to your interest. 
+
+```{r}
+library(scatterplot3d)
+s3d <- scatterplot3d(USArrests[,-3], type="h", highlight.3d=TRUE,
+                     angle=55, scale.y=0.7, pch=16, main = "USArrests")
+
+```
+
+**Correlation Plot**
+
+You can also observe the multiple relationship in the data by drawing correlation plot.
+
+```{r}
+library(corrplot)
+corrplot(cor(USArrests), method="circle")
+```
+
+
+**The bivariate boxplot**
+
+In many cases, it might be helpful to have a more formal and objective method for labelling observations as outliers, and such a method is provided by the bivariate boxplot, which is a two-dimensional analogue of the boxplot for univariate
+data proposed by Goldberg and Iglewicz (1992). 
+
+
+This type of graphic may be useful in indicating the distributional properties of the data and in identifying possible outliers.
+
+
+```{r,warning=FALSE,message=FALSE}
+library(MVA)
+```
+
+Suppose that we are interested in the relationship between urban population and rape. 
+
+```{r}
+sub<-USArrests[,c("UrbanPop", "Rape")]
+head(sub)
+```
+
+```{r}
+bvbox(sub,xlab = "UrbanPop", ylab ="Rape")
+text(sub$UrbanPop, sub$Rape)
+```
+
+It is seen that we have one outlier observation. It is also said that the median of urban population is close to 60 and median of rape is close to 20. 
+
+
+If you would like to detect which observation is outlier you can use text function.
+
+```{r}
+bvbox(sub,xlab = "UrbanPop", ylab ="Rape")
+text(sub$UrbanPop, sub$Rape)
+```
+
+It is seen that second city which is Alaska is the outlier in the data.
+
+
+**The bubble and other glyph plots**
+
+The basic scatter plot can only display two variables. But there have been a number of suggestions as to how extra variables may be included on a scatter plot. Perhaps the simplest is the so-called bubble plot, in which three variables are displayed; two are used to form the scatte rplot itself, and then the values of the third variable are represented by circles with radii proportional
+to these values and centered on the appropriate point in the scatter plot. 
+
+Above, we check the relationship between urban population and rape. 
+
+```{r}
+#plot(y~x)
+plot(Rape~UrbanPop, data = USArrests, pch = 10,main="The Scatter Plot of Rape and Urban Pop")
+```
+
+It is the scatter plot of urban population and rape. There is a positive relationship between them.
+
+Now, include the number of murders and investigate the relationship between these three variables. 
+
+
+```{r}
+plot(Rape~UrbanPop, data = USArrests, pch = 10,main="The Scatter Plot of Rape and UrbanPop")
+with(USArrests,symbols(UrbanPop, Rape, circles = Murder,
+inches = 0.5, add = TRUE))
+```
+
+
+```{r}
+ggplot(USArrests,aes(x=UrbanPop, y = Rape, size= Murder, colour= Murder))+geom_point()+labs(title = "The Scatter Plot of Rape, Urban Population and Murder in USA")
+```
+
+The plot seems to suggest that crowded cities with high number of rape tend to suffer from the high number of murder. 
+
+**Chernoff's Face and Star Plot**
+
+Chernoff faces, invented by Herman Chernoff in 1973, display multivariate data in the shape of a human face. The individual parts, such as eyes, ears, mouth and nose represent values of the variables by their shape, size, placement and orientation.
+
+```
+install.packages("aplpack")
+```
+
+```{r}
+library(aplpack)
+faces(USArrests)
+```
+
+Star plot is the another version of Chernoff Faces which is drawn using same package.
+
+```{r}
+stars(USArrests)
+```
+
+#### Estimating The Density
+
+The way of estimating and visualizing the density of the variable is histogram with kernel density line. To do so,
+
+```
+install.packages("psych")
+```
+```{r,warning=FALSE,message=FALSE}
+library(psych)
+multi.hist(USArrests) 
+```
+
+As seen, rape has right skewed distribution. You can make similar interpretation for other variables.
+
+#### Trellis graphics
+
+Trellis graphics is an approach to examining high-dimensional structure in data by means of one-,
+two-, and three-dimensional graphs. The problem addressed is how observations of one or more variables depend on the observations of the other variables. The essential feature of this approach is the multiple conditioning that allows some type of plot to be displayed for different values of a given variable
+(or variables). The aim is to help in understanding both the structure of the data and how well proposed models describe the structure.
+
+The trelli's graphs is drawn using ```xyplot``` function.
+
+For example, 
+
+```{r}
+xyplot(Rape ~ Assault | cut(UrbanPop,2), data = USArrests)
+```
+
+```{r}
+ggplot(USArrests,aes(x=Assault, y=Rape))+geom_point()+facet_wrap(~cut(UrbanPop,2))
+```
+
+
+This is the scatter plot of assault and rape with respect to urban population. As seen, we observe increasing relationship in the both cases. 
+
+For more Trellis graph, you can [visit](https://www.stat.auckland.ac.nz/~ihaka/787/lectures-trellis.pdf).
+
+
+Since the data set we are working with includes only numerical variables, we have shown only graphics used for the quantitative variables. However, for categorical variables, you can use
+
++ clustered & stacked bar plot 
+
++ mosaic plot 
+
+**Reference**
+
+Everitt, B.S., & Hothorn, T. (2011). An Introduction to Applied Multivariate Analysis with R.
+
+
+
+
+
+
+
