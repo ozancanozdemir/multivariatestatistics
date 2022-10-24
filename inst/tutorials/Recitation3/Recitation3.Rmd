@@ -66,10 +66,20 @@ and
 
 $$ B = \left( \begin{matrix} 2 & 1 & 0 \\ 7 & 6 & 1 \\ 5 & 4 & 8 \end{matrix} \right) $$
 
+```
+A<-matrix(c(2,5,2,3,3,4,1,2,10),nrow = 3)
+A
+```
+
 
 ```{r}
 A<-matrix(c(2,5,2,3,3,4,1,2,10),nrow = 3)
 A
+```
+
+```
+B<-matrix(c(2,7,5,1,6,4,0,1,8),nrow = 3)
+B
 ```
 
 ```{r}
@@ -79,11 +89,20 @@ B
 
 Extract the first row of the matrix of $A$
 
+
+```
+A[1,]
+```
+
 ```{r}
 A[1,]
 ```
 
 Extract the third column of the matrix of $B$
+
+```
+B[,3]
+```
 
 ```{r}
 B[,3]
@@ -91,6 +110,10 @@ B[,3]
 
 
 Extract the entry on the 1st row and 2nd column of the matrix $A$.
+
+```
+A[1,2]
+```
 
 ```{r}
 A[1,2]
@@ -104,6 +127,11 @@ colnames(puan_durumu) = c("Game","Win","Draw","Lose")
 rownames(puan_durumu) = c("Galatasaray","Fenerbahce","Besiktas")
 puan_durumu
 ```
+
+```
+puan_durumu["Galatasaray","Win"]
+```
+
 
 ```{r}
 puan_durumu["Galatasaray","Win"]
@@ -119,19 +147,40 @@ If you have a vector that contains the elements or the
 entries of a diagonal matrix, you can create a diagonal matrix with the R command
 ```diag.``` Study the following examples.
 
+```
+a = 1:5
+diag(a) # Gives a square matrix with diagonal entries a.
+```
+
+
 ```{r}
 a = 1:5
 diag(a) # Gives a square matrix with diagonal entries a.
 ```
+
+```
+diag(11:20)
+```
+
+
 
 ```{r}
 diag(11:20)
 ```
 
 
+```
+diag(1,5) # Command format is diag(x,nrow,ncol). Here nrow=5.
+```
+
 ```{r}
 diag(1,5) # Command format is diag(x,nrow,ncol). Here nrow=5.
 ```
+
+```
+diag(1:2,4,5) # No longer a square matrix.
+```
+
 
 ```{r}
 diag(1:2,4,5) # No longer a square matrix.
@@ -139,18 +188,40 @@ diag(1:2,4,5) # No longer a square matrix.
 
 + **Upper and lower diagonal matrices**
 
-```{r}
+
+```
 a = matrix(1:36,6)
 a
 ```
 
 ```{r}
+a = matrix(1:36,6)
+a
+```
+
+```
 lower.tri(a, diag = FALSE) # TRUEs NOT lower triangular as in notes.
 ```
+
+
+```{r}
+lower.tri(a, diag = FALSE) # TRUEs NOT lower triangular as in notes.
+```
+
+
+```
+lower.tri(a, diag = TRUE) # TRUEs now lower triangular as in notes.
+```
+
 
 ```{r}
 lower.tri(a, diag = TRUE) # TRUEs now lower triangular as in notes.
 ```
+
+```
+upper.tri(a, diag = TRUE)
+```
+
 
 ```{r}
 upper.tri(a, diag = TRUE)
@@ -161,8 +232,17 @@ upper.tri(a, diag = TRUE)
 Checking the dimension of a matrix (number of rows and columns) can be done using
 the command ```dim.```
 
+```
+dim(A)
+```
+
+
 ```{r}
 dim(A)
+```
+
+```
+dim(B)
 ```
 
 ```{r}
@@ -174,8 +254,16 @@ dim(B)
 
 We use **+** for summation and **-** for substraction.
 
+```
+A+B
+```
+
 ```{r}
 A+B
+```
+
+```
+A-B
 ```
 
 ```{r}
@@ -187,6 +275,11 @@ A-B
 
 The column number of first matrix has to be equal to the row number of the second matrix.
 
+```
+D = A %*% B # Matrix multiplication.
+D # Note the dimension of D.
+```
+
 ```{r}
 D = A %*% B # Matrix multiplication.
 D # Note the dimension of D.
@@ -197,6 +290,10 @@ D # Note the dimension of D.
 
 Transpose of $A$=$A^{T}$
 
+```
+t(A)
+```
+
 ```{r}
 t(A)
 ```
@@ -206,6 +303,10 @@ t(A)
 
 Determinant of $A$=$det(A)=|A|$
 
+```
+det(A)
+```
+
 ```{r}
 det(A)
 ```
@@ -213,6 +314,10 @@ det(A)
 **Rank of Matrix**
 
 The maximum number of linearly independent number of row or column. You can use either a package or the following function.  
+
+```
+qr(A)$rank
+```
 
 ```{r}
 qr(A)$rank
@@ -225,6 +330,11 @@ Transpose of $A$=$A^{-1}$
 
 There are many functions from several packages to calculate the inverse of any matrix in R. Among them,```solve``` is a base function in R.
 
+```
+solve(A)
+```
+
+
 ```{r}
 solve(A)
 ```
@@ -234,17 +344,35 @@ solve(A)
 
 In R, the eigenvalues and eigenvectors of **a square matrix** $A$ is given by ```eigen(A)```. The output of the function is a list, with components values containing eigenvalues and vectors containing eigenvectors as columns of an eigenmatrix. Run the following:
 
+
+```
+ev=eigen(A)
+ev#both eigenvales and eigenvectors
+```
+
 ```{r}
 ev=eigen(A)
 ev#both eigenvales and eigenvectors
+```
+
+```
+ev$values # Gives eigen values.
 ```
 
 ```{r}
 ev$values # Gives eigen values.
 ```
 
+```
+ev$vectors # Gives eigen vectors as a matrix.
+```
+
 ```{r}
 ev$vectors # Gives eigen vectors as a matrix.
+```
+
+```
+sum(diag(A)) # trace(B).
 ```
 
 ```{r}
@@ -259,10 +387,24 @@ $$
 $$
 For example
 
+```
+A = matrix(c(2,1,1,1,4,1,1,1,2),3)
+A
+```
+
 ```{r}
 A = matrix(c(2,1,1,1,4,1,1,1,2),3)
 A
 ```
+
+```
+C = eigen(A)$vectors
+D.sqrt = diag(sqrt(eigen(A)$values))
+D.sqrt
+A.sqrt = C %*% D.sqrt %*% t(C) # Square root of matrix A.
+A.sqrt 
+```
+
 
 ```{r}
 C = eigen(A)$vectors
@@ -272,11 +414,25 @@ A.sqrt = C %*% D.sqrt %*% t(C) # Square root of matrix A.
 A.sqrt 
 ```
 
+```
+A.sqrt %*% A.sqrt # Gives A.
+```
+
+
 ```{r}
 A.sqrt %*% A.sqrt # Gives A.
 ```
 
 **For a symmetric matrix A, the eigenvectors are both column and row orthogonal.**
+
+```
+
+C=eigen(A)$vectors # Gives eigen-vectors of A.
+D=diag(eigen(A)$values) # Diagonal matrix of eigen-values.
+C
+D
+```
+
 
 ```{r}
 
@@ -287,11 +443,26 @@ D
 ```
 
 
+```
+t(C)%*%C # Is matrix C an orthogonal matrix?
+round(t(C)%*%C,3) # Easier to see what is going on!
+
+```
+
+
 ```{r}
 t(C)%*%C # Is matrix C an orthogonal matrix?
 round(t(C)%*%C,3) # Easier to see what is going on!
 
 ```
+
+```
+C%*%t(C) # Try round(C%*%t(C),3)
+C%*%D%*%t(C) # Matrix A.
+A
+```
+
+
 
 ```{r}
 C%*%t(C) # Try round(C%*%t(C),3)
@@ -307,8 +478,17 @@ Consider a general rectangular matrix A of size nxp where $(n > p)$ and of rank 
 The singular value decomposition in R can be done using the function ```svd()```. For big data,
 it is usually better to use a different function called ```La.svd()```.
 
+```
+A
+```
+
 ```{r}
 A
+```
+
+```
+Asvd = svd(A)
+Asvd
 ```
 
 
@@ -339,6 +519,9 @@ $$ N = \left( \begin{matrix} 1 & 1 & 3 \\ 5 & 2 & 6 \\ -2 & -1 & -3 \end{matrix}
 
 **What is the rank of the matrix N?**
 
+```{r m7, exercise=TRUE}
+
+```
 
 **Calculate the following expressions**
 
@@ -405,6 +588,12 @@ data(USArrests)
 knitr::kable(head(USArrests))
 ```
 
+```
+dim(USArrests)
+```
+
+
+
 ```{r}
 dim(USArrests)
 ```
@@ -414,12 +603,24 @@ A data frame with 50 observations on 4 variables.
 
 Obtain mean vector $\mu$ and variance-covariance matrix $\Sigma$ and correlation matrix $\rho$ of the dataset.
 
-```{r}
+```
 colMeans(USArrests) #obtain mean vector
 ```
 
 ```{r}
+colMeans(USArrests) #obtain mean vector
+```
+
+```
 var(USArrests) #obtain var-cov matrix 
+```
+
+```{r}
+var(USArrests) #obtain var-cov matrix 
+```
+
+```
+cor(USArrests) #obtain correlation matrix
 ```
 
 ```{r}
@@ -427,6 +628,11 @@ cor(USArrests) #obtain correlation matrix
 ```
 
 You should also use ```summary``` command to obtain other descriptive statistics.
+
+
+```
+summary(USArrests)
+```
 
 ```{r}
 summary(USArrests)
@@ -447,6 +653,12 @@ Note that both base and ggplot2 versions are given for the plot types explaining
 
 Scatter plots should already be familiar as a means of exploring the relationship between two variables.
 
+```
+attach(USArrests)
+plot(Assault,Murder)
+par(las = 1) ## Horizontal axis units on y axis
+```
+
 
 ```{r}
 attach(USArrests)
@@ -454,8 +666,18 @@ plot(Assault,Murder)
 par(las = 1) ## Horizontal axis units on y axis
 ```
 
+```
+plot(Assault,Murder, main = "Scatter plot", pch = 16)
+```
+
+
 ```{r}
 plot(Assault,Murder, main = "Scatter plot", pch = 16)
+```
+
+```
+library(ggplot2)
+ggplot(USArrests,aes(x = Assault, y= Murder))+geom_point()
 ```
 
 ```{r}
@@ -468,8 +690,16 @@ There is a positive relationship between Murder and Assault. However, Is this pl
 
 We have more than two variables of interest. A set of pairwise scatter plots (sometimes called a draftsman plot) may be of use:
 
+```
+pairs(USArrests, pch = 16) #pch is point type
+```
+
 ```{r}
 pairs(USArrests, pch = 16) #pch is point type
+```
+
+```
+GGally::ggpairs(USArrests)
 ```
 
 ```{r}
@@ -479,6 +709,11 @@ GGally::ggpairs(USArrests)
 
 There other useful functions available. For example what does splom do? (Look up >?splom).
 
+```
+library(lattice)
+splom(~USArrests)
+```
+
 ```{r,warning=FALSE,message=F}
 library(lattice)
 splom(~USArrests)
@@ -486,6 +721,14 @@ splom(~USArrests)
 
 
 You can also visualize 3d scatter plot in R using ```scatterplot3d```. While doing this,please consider three variables which are related to your interest. 
+
+
+```
+library(scatterplot3d)
+s3d <- scatterplot3d(USArrests[,-3], type="h", highlight.3d=TRUE,
+                     angle=55, scale.y=0.7, pch=16, main = "USArrests")
+
+```
 
 ```{r}
 library(scatterplot3d)
@@ -497,6 +740,11 @@ s3d <- scatterplot3d(USArrests[,-3], type="h", highlight.3d=TRUE,
 **Correlation Plot**
 
 You can also observe the multiple relationship in the data by drawing correlation plot.
+
+```
+library(corrplot)
+corrplot(cor(USArrests), method="circle")
+```
 
 ```{r}
 library(corrplot)
@@ -513,15 +761,30 @@ data proposed by Goldberg and Iglewicz (1992).
 This type of graphic may be useful in indicating the distributional properties of the data and in identifying possible outliers.
 
 
+
+```
+library(MVA)
+```
+
 ```{r,warning=FALSE,message=FALSE}
 library(MVA)
 ```
 
 Suppose that we are interested in the relationship between urban population and rape. 
 
+```
+sub<-USArrests[,c("UrbanPop", "Rape")]
+head(sub)
+```
+
 ```{r}
 sub<-USArrests[,c("UrbanPop", "Rape")]
 head(sub)
+```
+
+```
+bvbox(sub,xlab = "UrbanPop", ylab ="Rape")
+text(sub$UrbanPop, sub$Rape)
 ```
 
 ```{r}
@@ -533,6 +796,11 @@ It is seen that we have one outlier observation. It is also said that the median
 
 
 If you would like to detect which observation is outlier you can use text function.
+
+```
+bvbox(sub,xlab = "UrbanPop", ylab ="Rape")
+text(sub$UrbanPop, sub$Rape)
+```
 
 ```{r}
 bvbox(sub,xlab = "UrbanPop", ylab ="Rape")
@@ -549,6 +817,11 @@ to these values and centered on the appropriate point in the scatter plot.
 
 Above, we check the relationship between urban population and rape. 
 
+```
+#plot(y~x)
+plot(Rape~UrbanPop, data = USArrests, pch = 10,main="The Scatter Plot of Rape and Urban Pop")
+```
+
 ```{r}
 #plot(y~x)
 plot(Rape~UrbanPop, data = USArrests, pch = 10,main="The Scatter Plot of Rape and Urban Pop")
@@ -558,11 +831,20 @@ It is the scatter plot of urban population and rape. There is a positive relatio
 
 Now, include the number of murders and investigate the relationship between these three variables. 
 
+```
+plot(Rape~UrbanPop, data = USArrests, pch = 10,main="The Scatter Plot of Rape and UrbanPop")
+with(USArrests,symbols(UrbanPop, Rape, circles = Murder,
+inches = 0.5, add = TRUE))
+```
 
 ```{r}
 plot(Rape~UrbanPop, data = USArrests, pch = 10,main="The Scatter Plot of Rape and UrbanPop")
 with(USArrests,symbols(UrbanPop, Rape, circles = Murder,
 inches = 0.5, add = TRUE))
+```
+
+```
+ggplot(USArrests,aes(x=UrbanPop, y = Rape, size= Murder, colour= Murder))+geom_point()+labs(title = "The Scatter Plot of Rape, Urban Population and Murder in USA")
 ```
 
 
@@ -580,12 +862,21 @@ Chernoff faces, invented by Herman Chernoff in 1973, display multivariate data i
 install.packages("aplpack")
 ```
 
+```
+library(aplpack)
+faces(USArrests)
+```
+
 ```{r}
 library(aplpack)
 faces(USArrests)
 ```
 
 Star plot is the another version of Chernoff Faces which is drawn using same package.
+
+```
+stars(USArrests)
+```
 
 ```{r}
 stars(USArrests)
@@ -598,6 +889,12 @@ The way of estimating and visualizing the density of the variable is histogram w
 ```
 install.packages("psych")
 ```
+
+
+library(psych)
+multi.hist(USArrests) 
+
+
 ```{r,warning=FALSE,message=FALSE}
 library(psych)
 multi.hist(USArrests) 
@@ -615,8 +912,17 @@ The trelli's graphs is drawn using ```xyplot``` function.
 
 For example, 
 
+
+```
+xyplot(Rape ~ Assault | cut(UrbanPop,2), data = USArrests)
+```
+
 ```{r}
 xyplot(Rape ~ Assault | cut(UrbanPop,2), data = USArrests)
+```
+
+```
+ggplot(USArrests,aes(x=Assault, y=Rape))+geom_point()+facet_wrap(~cut(UrbanPop,2))
 ```
 
 ```{r}
