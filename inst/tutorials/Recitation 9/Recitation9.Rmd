@@ -1,0 +1,536 @@
+---
+title: "Stat 467-Recitation 9"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Preliminary to the lab 
+
+[Here](https://open.spotify.com/track/3JvKfv6T31zO0ini8iNItO?si=40d9eb5e99544162) is a song to make you in a good mood. 
+
+Please import the necessary packages. 
+
+```{r,warning=FALSE,message=FALSE}
+library(MVN)
+library(dplyr)
+library (psych)
+library(ICSNP)
+library(rstatix)
+library(heplots)
+library(gridExtra)
+library(ggplot2)
+```
+
+## Assessing Normality in Multivariate Data
+
+The importance of the normality in multivariate analysis was emphasized in Recitation 4. Now, we will see the ways for assesing the normality in R.
+
+There are many packages to check multivariate normality in R, among them I use `MVN` developed by Turkish Statisticians.
+
+```{r,echo=FALSE}
+knitr::include_graphics("https://i4.hurimg.com/i/hurriyet/75/750x422/576fb48367b0a9694c865a8b.jpg")
+```
+
+```{r,warning=FALSE,message=FALSE}
+library(MVN)
+```
+
+This package conducts all analysis via `mvn` funciton. This function includes all the arguments to assess multivariate normality through multivariate normality tests, multivariate plots, multivariate outlier detection, univariate normality tests and univariate plots.
+
+    mvn(data, subset = NULL, mvnTest = c("mardia", "hz", "royston", "dh",
+    "energy"), covariance = TRUE, tol = 1e-25, alpha = 0.5,
+    scale = FALSE, desc = TRUE, transform = "none", R = 1000,
+    univariateTest = c("SW", "CVM", "Lillie", "SF", "AD"),
+    univariatePlot = "none", multivariatePlot = "none",
+    multivariateOutlierMethod = "none", bc = FALSE, bcType = "rounded",
+    showOutliers = FALSE, showNewData = FALSE)
+
+#### Chi-Square Plot
+
+As univaraiate case, we will use both visual and numerical ways to check the multivariate normality.
+
+The visual way of checking normality is drawing Chi-square QQ plot. To draw it, you can use the `multivariatePlot= "qq"` option in the `mvn.`
+
+We will use `USArrests` data again.
+
+```{r}
+mvn(USArrests,multivariatePlot= "qq")
+```
+
+It can be seen from Figure above that there are some deviations from the straight line and this indicates possible departures from a multivariate normal distribution.
+
+#### Formal Tests
+
+After the visual tool, we should conduct a formal test to check multivariate normality. In the literature, many numbers of multivariate normality test and this package gives an opportunity to use some of them.
+
+For all tests, we test the following hypothesis.
+
+$H_0$: The data follows normal distribution.
+
+$H_1$: The data does not follow normal distribution.
+
+-   If you have a data where $n<20$, you can use Mardias MVN test by using `mvnTest = "mardia"` argument in `mvn` function.
+
+-   If you have a data where $n<5000$, you can use Roystons MVN test by using `mvnTest = "royston"` argument in `mvn` function.
+
+-   You can also use Henze-Zirklers MVN test which is not limited by sample size by using `mvnTest = "hz"` argument in `mvn` function.
+
+In this example, I use Roystons MVN test since it depends on Shapiro-Wilk test.
+
+```{r}
+result <- mvn(data = USArrests, mvnTest = "royston")
+result$multivariateNormality
+```
+
+Since p value is less than $\alpha$, we reject $H_0$ and we can say that we don't have enough evidence to prove that the data follow normal distribution.
+
+#### Univariate Plots
+
+Checking univariate plots and tests could be very useful to diagnose the reason for deviation from MVN. We can check this assumption through univariatePlot and univariateTest arguments from the `mvn` function. Set `univariatePlot` argument `"qq"` for Q-Q plots, `"histogram"` for histograms with normal curves, `"box"` for box-plots and `"scatter"` for scatterplot matrices.
+
+```{r}
+# create univariate Q-Q plots
+result <- mvn(data = USArrests, mvnTest = "royston", univariatePlot = "qqplot")
+
+```
+
+```{r}
+# create univariate histograms
+result <- mvn(data = USArrests, mvnTest = "royston", univariatePlot = "histogram")
+```
+
+```{r}
+result$univariateNormality #univariate normality result. 
+```
+
+As you see, Rape and Assult are the variables which violates the multivaraite normality.
+
+#### Outlier Detection
+
+Multivariate outliers are the common reason for violating MVN assumption. In other words, MVN assumption requires the absence of multivariate outliers. Thus, it is crucial to check whether the data have multivariate outliers, before starting to multivariate analysis. The MVN includes two multivariate outlier detection methods which are based on robust Mahalanobis distances and adjusted Mahalanobis distance.
+
+```{r}
+# Mahalanobis distance
+result <- mvn(data = USArrests, mvnTest = "royston", multivariateOutlierMethod = "quan")
+```
+
+As seen that, we have 10 outlier observations proved by Mahalanobis Distance in this dataset.
+
+```{r}
+# Adjusted Mahalanobis distance
+result <- mvn(data = USArrests, mvnTest = "royston", multivariateOutlierMethod = "adj")
+```
+
+As seen that, we have 9 outlier observations proved by Adjusted Mahalanobis Distance in this dataset.
+
+## Hypothesis Testing in Multivariate Analysis
+
+The theoretical details were given in your recitation notes, you can check them.
+
+### Inference about mean
+
+#### Hotelling $T^2$
+
+As you know, we use Hotelling $T^2$ to test the hypothesis related to mean of one or two population in practice.
+
+$T^2(x):= n (\bar{x}-\mu_0)' \hat \Sigma(x)^{-1} (\bar{x}-\mu_0)$
+
+It is easy to hold this test in R. Like other funcitons, you can figure out several R packages for this test such as `ICSNP` and `DescTools`
+
+    install.packages("ICSNP")
+
+**Example 1 (One Population Mean)**
+
+In this part we'll consider a dataset which involces 17 overdoses of the drug amitriptyline. There are two responses we want to model: **TOT** and **AMI**.
+
+TOT is total TCAD plasma level and AMI is the amount of amitriptyline present in the TCAD plasma level.
+
+The predictors are as follows:
+
+-   GEN, gender (male = 0, female = 1)
+
+-   AMT, amount of drug taken at time of overdose
+
+-   PR, PR wave measurement
+
+-   DIAP, diastolic blood pressure
+
+-   QRS, QRS wave measurement
+
+```{r}
+ami_data <- read.table("http://static.lib.virginia.edu/statlab/materials/data/ami_data.DAT")
+names(ami_data) <- c("TOT","AMI","GEN","AMT","PR","DIAP","QRS")
+ami_data
+```
+
+Suppose that we'd like to test the null hypothesis that the observations come from the mean vector of the responses variables $\mu_0^{T}=[1000,1000]$
+
+That means our hypothesis is
+
+$H_0=\mu=\mu_0$ vs $H_1=\mu \neq \mu_0$
+
+First of all, create submatrix including your variable of interests.
+
+```{r}
+library(dplyr)
+y<-ami_data%>%select(TOT,AMI)
+y
+```
+
+Then create $\mu_0$ vector.
+
+```{r}
+mu0=c(1000,1000)
+```
+
+Calculate the mean of the dependent variables. 
+
+```{r}
+xbar = colMeans(y)
+xbar
+```
+
+You know the assumption of this test is that the samples should follow normal distribution.
+
+```{r,warning=FALSE,message=FALSE}
+library(MVN)
+test<-mvn(y,mvnTest = "mardia")
+test$multivariateNormality
+```
+
+The response matrix does not follow normal distribution. In this case, you can apply a solution to solve this problem. For example, consider the log of the data.
+
+```{r,warning=FALSE,message=FALSE}
+log_y <- log(y)
+test<-mvn(log_y,mvnTest = "mardia")
+test$univariateNormality
+```
+
+The normality is satisfied.
+
+In this case, note that we will not test $\mu_0$. We will test $log(\mu_0)$.
+
+Before starting the formal tests, let's visualize our response matrix.
+
+```
+install.packages ("psych")
+
+```
+
+```{r,warning=FALSE,message=FALSE}
+library (psych)
+error.bars (log_y, ylab="Group Means", xlab=" Dependent Variables")
+```
+
+
+
+```{r,warning=FALSE,message=FALSE}
+library(ICSNP)
+HotellingsT2(log_y,mu=log(mu0))
+```
+
+Since $p<\alpha$ we reject $H_0$. Therefore, we don't have enough evidence to conclude that the log of the mean vector equals to $log(1000,1000)$.
+
+**Example 2 (Two Independent Samples)**
+
+When we compare two independent samples in multivariate analysis, we assume that
+
+-   $\Sigma_1=\Sigma_2=\Sigma$
+
+-   Both samples follow normal distributions.
+
+-   $|\Sigma| > 0$
+
+In this example, we'll test whether there is a difference in the response variable with respect to gender. In other words, we'll test that
+
+$H_0=\mu_{female}=\mu_{male}$ vs $H_1=\mu_{female} \neq \mu_{male}$
+
+where
+
+$\mu_{female}=[\mu_{TOT/female}, \mu_{AMI/female}]$
+
+$\mu_{male}=[\mu_{TOT/male}, \mu_{AMI/male}]$
+
+We've already proven that the samples do not follow Normal distribution. Thus, we will conduct the test through the log of the data. In other words, we will check the equality between the groups using the logs of the data. 
+
+
+Prior to the testing procedure, we will test the assumptions. Let's start with the normality. 
+
+Create a submatrix of the data including only variable of interests.
+
+```{r}
+subset_data <- ami_data%>%select(TOT,AMI,GEN)
+```
+
+```{r}
+table(subset_data$GEN)
+```
+Since the frequency of one gender is smaller than 7, we cannot use mvn package here. Here is an alternative approach. 
+
+Add the logs of the response to the data.
+
+```{r}
+subset_data = subset_data %>% mutate(log_tot = log(TOT), log_ami = log(AMI))
+```
+
+
+```{r}
+library(rstatix)
+subset_data %>% group_by(GEN) %>%  shapiro_test(log_tot,log_ami)
+```
+As the p-value is non-significant (p > 0.05) for each combination of independent and dependent variables, we fail to reject the null hypothesis and conclude that data follows univariate normality.
+
+After the normality, we will use Box’s M test to assess the homogeneity of the variance-covariance matrices. 
+
+Null hypothesis: variance-covariance matrices are equal for each combination formed by each group in the independent variable 
+
+```{r,error=FALSE,warning=FALSE}
+library(heplots)
+boxM(Y = cbind(subset_data$log_tot,subset_data$log_ami), group = factor(subset_data$GEN))
+```
+
+As the p-value is non-significant (p > 0.05) for Box’s M test, we fail to reject the null hypothesis and conclude that variance-covariance matrices are equal for each combination of the dependent variable formed by each group in the independent variable.
+
+If this assumption fails, it would be good to check the homogeneity of variance assumption using Bartlett’s or Levene’s test to identify which variable fails in equal variance.
+
+After that we will conduct the hypothesis. 
+
+```{r}
+HotellingsT2(cbind(subset_data$log_tot,subset_data$log_ami) ~ subset_data$GEN)
+```
+
+Since $p<\alpha$ we fail to reject $H_0$. Therefore, we don't have enough evidence to prove that the mean of responses change with respect to gender.
+
+**Example 3 (One Way MANOVA)**
+
+In this example, we'll consider the same data.  To make the data usable for the analysis, we'll add a column called drug representing the type of the drug. 
+
+```{r}
+ami_data1<-ami_data
+ami_data1$drug<-c(rep(1,3),rep(3,11),rep(2,3))
+ami_data1$drug<-as.factor(ami_data1$drug)
+ami_data1
+```
+
+We'll test whether the response variables (TOT and AMI) varies with respect to drug type. In other words, we'll test
+
+$H_0=\mu_1=\mu_2=\mu_3$ vs $H_1=\text{At least one is different}$ where $\mu_i's$ are mean vector for $i=1,2,3$.
+
+Note that the original variables fail in normality.  As in the previous examples, we will consider the logs of the responses.
+
+For the simplicity, create a submatrix including the variables of interests. 
+
+
+```{r}
+subset_data1 <- ami_data1 %>% select(TOT, AMI, drug) %>% mutate(log_tot = log(TOT), log_ami = log(AMI))
+subset_data1 %>% head()
+```
+
+Calculate the descriptive statistics 
+
+```{r}
+subset_data1 %>% group_by(drug) %>%  summarise(n = n(), 
+                                               mean_logtot = mean(log_tot), 
+                                               sd_logtot = sd(log_tot),
+                                               mean_logami = mean(log_ami),
+                                               sd_logami = sd(log_ami))
+```
+After that visualize the data 
+
+```{r}
+library(gridExtra)
+library(ggplot2)
+p1 <- ggplot(subset_data1, aes(x = drug, y = log_tot, fill = drug)) + geom_boxplot(outlier.shape = NA) + geom_jitter(width = 0.2) + theme(legend.position="top")+
+labs(title = "The Box Plot of TOT by Drug." ,subtitle = "log of TOT is used.")
+p2 <- ggplot(subset_data1, aes(x = drug, y = log_ami, fill = drug)) + geom_boxplot(outlier.shape = NA) + geom_jitter(width = 0.2) + theme(legend.position="top")+
+labs(title = "The Box Plot of AMI by Drug." ,subtitle = "log of AMI is used.")
+grid.arrange(p1, p2, ncol=2)
+```
+
+After the descriptive analysis, we will check the assumptions. Look at the normality. Since we have $n<7$ for groups, we cannot use the mvn again.
+
+
+```{r}
+library(rstatix)
+subset_data1 %>% group_by(drug) %>%  shapiro_test(log_tot,log_ami)
+```
+As the p-value is non-significant (p > 0.01) for each combination of independent and dependent variables, we fail to reject the null hypothesis and conclude that data follows univariate normality.
+
+After the normality, we will use Box’s M test to assess the homogeneity of the variance-covariance matrices. 
+
+Null hypothesis: variance-covariance matrices are equal for each combination formed by each group in the independent variable 
+
+```{r}
+library(heplots)
+boxM(Y = cbind(subset_data1$log_tot,subset_data1$log_ami), group = factor(subset_data1$drug))
+```
+
+
+As the p-value is non-significant (p > 0.01) for Box’s M test, we fail to reject the null hypothesis and conclude that variance-covariance matrices are equal for each combination of the dependent variable formed by each group in the independent variable.
+
+If this assumption fails, it would be good to check the homogeneity of variance assumption using Bartlett’s or Levene’s test to identify which variable fails in equal variance.
+
+After that we will conduct the hypothesis. 
+
+```{r}
+m1 <- manova(cbind(log_tot,log_ami) ~ drug, data = subset_data1)
+summary(m1)
+```
+We'll interpret this table as usual ANOVA table. The value which should take into account is $Pr(>F)$ value which indicates $p$ value. 
+
+Therefore, we are 95% confident that at least one drug type is significantly different than others since $p<\alpha$.
+
+If we reject the null hypothesis in MANOVA, we need to hold a post-hoc analysis to see which one causes the difference. To do so,
+
+```{r}
+summary.aov(m1)
+```
+
+From the output above, it can be seen that the TOT variable highly significantly different among drug type. However, we cannot make a similar conclusion for AMI.
+
+**NOTE**
+
+As you may guess, the difference between manova and two samples test is the number of levels in the treatment (categorical variable.)
+
+The categorical variable in two samples test has two levels such as female and male. However, the one in MANOV has number of levels greater than 2.
+
+
+#### Exercise 
+
+*Please compile following code.* 
+
+```{r}
+y1 <-rnorm(50,25,4)
+y2 <- rnorm(50,12,2)
+trt <- c(rep("a",12),rep("b",8),rep("c",30))
+d<-data.frame(y1,y2,trt)
+```
+
+**Calculate the mean of y1 and y2 for levels of the treatment** 
+
+
+```{r m1, exercise=TRUE}
+
+```
+
+**Visualize the data**
+
+```{r m2, exercise=TRUE}
+
+```
+
+**Check the normality of the each population**
+
+```{r m3, exercise=TRUE}
+
+```
+
+**Assess the equality of the variance**
+
+
+```{r m4, exercise=TRUE}
+
+```
+
+
+**Conduct one way MANOVA and interpret the result. **
+
+```{r m5, exercise=TRUE}
+
+```
+
+
+## Multivariate Multiple Linear Regression in R 
+
+The multivariate linear model accommodates two or more response variables. The multivariate general linear model is
+
+$$
+\underset{(n \times m)}{\mathbf{Y}}=\underset{(n \times k+1)(k+1 \times m)}{\mathbf{X}}+\underset{(n \times m)}{\mathbf{E}}
+$$
+
+where $Y$ is a matrix of $n$ cases on $m$ response variables; $X$ is a model matrix with columns for $k+1$ regressors, typically including an initial column of $1 \mathrm{~s}$ for the regression constant; $\mathrm{B}$ is a matrix of regression coefficients, one column for each response variable; and $\mathbf{E}$ is a matrix of errors. ${ }^{1}$ The contents of the model matrix are exactly as in the univariate linear model and may contain, therefore, dummy regressors representing factors, polynomial or regression-spline terms, interaction regressors, and so on.
+
+The assumptions of the multivariate linear model concern the behavior of the errors: Let $\varepsilon_{i}^{\prime}$ represent the ith row of $\mathbf{E}$. Then $\varepsilon_{i}^{\prime} \sim \mathbf{N}_{m}(\mathbf{0}, \mathbf{\Sigma}),$ where $\mathbf{\Sigma}$ is a nonsingular error-covariance matrix, constant across cases; $\varepsilon_{i}^{\prime}$ and $\varepsilon_{i}^{\prime}$ are independent for $i \neq i^{\prime} ;$ and $\mathbf{X}$ is fixed or independent of $\mathbf{E}$
+
+The maximum-likelihood estimator of $\mathbf{B}$ in the multivariate linear model is equivalent to equationby-equation least squares for the individual responses:
+
+$$
+\hat{\mathbf{B}}=\left(\mathbf{X}^{\prime} \mathbf{X}\right)^{-1} \mathbf{X}^{\prime} \mathbf{Y}
+$$
+
+Procedures for statistical inference in the multivariate linear model, however, take account of the fact that there are several, generally correlated, responses.
+
+Paralleling the decomposition of the total sum of squares into regression and residual sums of squares in the univariate linear model, there is in the multivariate linear model a decomposition of the total sum-of-squares-and-cross-products ( $S S P$ ) matrix into regression and residual SSP matrices. We have
+where $\overline{\mathbf{y}}$ is the $(m \times 1)$ vector of means for the response variables; $\hat{\mathbf{Y}}=\mathbf{X} \hat{\mathbf{B}}$ is the matrix of fitted values; and $\hat{\mathbf{E}}=\mathbf{Y}-\hat{\mathbf{Y}}$ is the matrix of residuals.
+
+Multivariate linear models are fit in R with the ```lm()``` function. The procedure is the essence of simplicity: The left-hand side of the model is a matrix of responses, with each column representing a response variable and each row a case; the right-hand side of the model and all other arguments to lm are precisely the same as for a univariate linear model. Typically, the response matrix is composed from individual response variables via the ```cbind()``` function.
+
+**Example 4**
+
+We'll consider **ami_data** dataset. 
+
+
+```{r}
+mlm1 <- lm(cbind(TOT, AMI) ~ GEN + AMT + PR + DIAP + QRS, data = ami_data)
+summary(mlm1)
+```
+
+Notice the summary shows the results of two regressions: one for TOT and one for AMI. These are exactly the same results we would get if modeled each separately. You can verify this for yourself by running the following code and comparing the summaries to what we got above. They are identical.
+
+```{r}
+m1 <- lm(TOT ~ GEN + AMT + PR + DIAP + QRS, data = ami_data)
+summary(m1)
+m2 <- lm(AMI ~ GEN + AMT + PR + DIAP + QRS, data = ami_data)
+summary(m2)
+```
+
+The same diagnostics we check for models with one predictor should be checked for these as well. These assumptions about the data, such as :
+
++ Linearity of the data. The relationship between the predictor (x) and the outcome (y) is assumed to be linear.
+
++ Normality of residuals. The residual errors are assumed to be normally distributed.
+
++ Homogeneity of residuals variance. The residuals are assumed to have a constant variance (homoscedasticity)
+
++ Independence of residuals error terms.
+
+
+We can use Rs extractor functions with our mlm1 object, except we will get double the output. For example, instead of one set of residuals, we get two:
+
+```{r}
+head(resid(mlm1))
+```
+
+Instead of one set of fitted values, we get two:
+
+```{r}
+head(fitted(mlm1))
+```
+
+Instead of one set of coefficients, we get two:
+
+
+```{r}
+coef(mlm1)
+```
+
+
+Instead of one residual standard error, we get two:
+
+```{r}
+sigma(mlm1)
+```
+
+Again these are all identical to what we get by running separate models for each response. The similarity ends, however, with the variance-covariance matrix of the model coefficients.
+
+```{r}
+vcov(mlm1)
+```
+
+For more details [click](https://socialsciences.mcmaster.ca/jfox/Books/Companion/appendices/Appendix-Multivariate-Linear-Models.pdf)
+
