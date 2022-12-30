@@ -1,0 +1,835 @@
+---
+title: "Stat 467-Recitation 11"
+output: learnr::tutorial
+runtime: shiny_prerendered
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Preliminary to the lab
+
+[Here](https://open.spotify.com/track/0pnC8KYOumEqzYDALFQNAL?si=d63b2b13758548da) is a song to make you in a good mood.
+
+Please import the necessary packages.
+In this class, we will use the following packages
+
+    library(corrplot)
+    library(factoextra)
+    library(psych)
+
+## Dimension Reduction
+
+One of the most commonly faced problems while dealing with data analytics problem such as recommendation engines, text analytics is high-dimensional and sparse data.
+At many times, we face a situation where we have a large set of features and fewer data points, or we have data with very high feature vectors.
+In such scenarios, fitting a model to the dataset, results in lower predictive power of the model.
+This scenario is often termed as the curse of dimensionality.
+In general, adding more data points or decreasing the feature space, also known as dimensionality reduction, often reduces the effects of the curse of dimensionality.
+
+**What is dimension reduction?**
+
+Dimension reduction is the process of reducing the number of variables (also sometimes referred to as features or of course dimensions) to a set of values of variables called principal variables.
+
+**Why we need dimension reduction?**
+
+Dimension reduction via feature extraction is an extremely powerful statistical tool and thus is frequently applied.
+Some of the main uses of dimension reduction are:
+
+-   simplification
+
+-   denoising
+
+-   variable selection
+
+-   visualization
+
+In the literature, there are several techniques for this purpose.
+One of these methods are Principal Component Analysis, Random Forest, Independent Component Analysis [ICA], Low Variance Filter, etc.
+
+### **Principal Component Analysis**
+
+Principal component analysis (PCA) is a statistical procedure that uses an rotation to convert a set of observations of possibly correlated variables (entities each of which takes on various numerical values) into a set of values of linearly uncorrelated variables called principal components.
+The theory of this concept depends on high level maths, statistics and linear algebra.
+As written in the definition, this technique produces new variables, being uncorrelated among each other, by applying some linear transformations on the correlated variables which are available in the data.
+These new predictors are called **principal component**.
+
+This technique is efficient when the data has correlated numerical variables because high correlation in the data indicates the redundant information.
+
+#### **Pros and Cons**
+
+**Strength**
+
+:) can be efficiently applied to large data sets
+
+:) has many extensions that deal with special situation such as sparse PCA when data has many missing values, kernel PCA can provide more robust solutions
+
+:) preserves global structures
+
+**Weaknesses**
+
+:( may suffer from scale problems, i.e. when one variable dominates the variance simply because it is in a higher scale (for example if one variable is measured in mm instead of km); some of these scale problems can simply be dealt with by centering and scaling
+
+:( suffers from crowding in the presence of large numbers of observations, i.e. points do not form clusters but instead occupy the entire plotting space
+
+:( is susceptible to big outliers
+
+:( makes the interpretation harder.
+
+PCA can be used for several purposes and one are that used is regression which is called principal component regression.
+
+### **What is Principal Component Regression and why is it used?**
+
+Principal components regression was first suggested by Kendall (1957).
+Its premise is to use the results of Principal Component Analysis performed on regressors and use the output as new regressors.
+That way the independent variables are orthogonal and ensure the computations are easier and more stable (Jolliffe (1982)).
+
+PCA in linear regression has been used to serve two basic goals.
+The first one is performed on datasets where the number of predictor variables is too high.
+It has been a method of dimensionality reduction along with Partial Least Squares Regression.
+Alternatively for reducing dimensions, there are methods like ridge regression, Lasso and remaining regression models using penalties (H. Lee, Park, and Lee (2015)).
+The second goal of PCR is to get rid of collinearities between variables.
+Because each subsequent principal component is orthogonal, PCR has been used in order to prevent errors cased by dependencies between assumed independent variables in regression (Hadi and Ling (1998)).
+
+When it comes to choosing the number of appropriate principal components, the researchers areâ€™t unanimous.
+One approach is, to choose the best principal components as if they were regular variables.
+Another, states that it is best to choose the first determined number of PCs that explain the highest variance (Hadi and Ling (1998)).
+This leads to rejecting some principal components that explain low variance.
+This approach however, has been criticised since those rejected PCs can actually be the ones that correlate with dependent variable (H. Lee, Park, and Lee (2015)).
+
+**The advantages of PCR have been best summarised by Ali S. Hadi and Robert F. Ling:**
+
+Because the PCs, $W_1,...,W_m$ are orthogonal, the problem of multicollinearity disappears completely, and no matter how many PCs are actually used, the regression equation will always contain all of the variables in X (because each PC is a linear combination of the variabes in X formed by an eigenvector of $Z^{T}Z$).
+
+PCR presumably improves the numerical accuracy of the regression estimates because of the use of orthogonal PCs.
+(Hadi and Ling (1998)
+
+#### **Steps for PCA**
+
+-   Standardize your dataset.
+
+-   Calculate the covariance matrix.
+
+-   Find the eigenvector and eigenvalues of the covariance matrix.
+    An eigenvector is a direction and an eigenvalue is a number that indicates how much variance is in the data in that direction.
+
+-   Sort the eigenvectors according to their eigenvalues in decreasing order.
+
+-   Choose first k eigen vectors and that will be the new k dimensions.
+
+-   Transform the original n dimensional data points into k dimensions.
+
+#### **PCA in R**
+
+Although this procedure requires high level knowledge in math, statistics and linear algebra in theory, we can apply it in R without having high level knowledge in practice.
+The fundamental of PCA is based on the eigenvalues and eigenvectors of correlation and/or covariance matrix of the data set, which are assumed as positive symmetric, or eigenvalues and eigenvectors of the dataset.
+
+For this purpose, we should consider decomposition techniques in the analysis and we need to make a decision at this step when we conduct this analysis in R.
+
+This analysis can be done by using `prcomp()` and `princomp()`.
+The difference between the two is simply the method employed to calculate PCA.
+According to `?prcomp:`
+
+The calculation is done by a singular value decomposition of the (centered and possibly scaled) data matrix, not by using eigen on the covariance matrix.
+This is generally the preferred method for numerical accuracy.
+
+`princomp()` uses the spectral decompositon.
+
+**Example 1**
+
+Please load `mtcars()` data set in R.
+
+    data(mtcars)
+    head(mtcars)
+
+```{r}
+data(mtcars)
+head(mtcars)
+```
+
+Check the dimension of the dataset.
+
+    dim(mtcars)
+
+```{r}
+dim(mtcars)
+```
+
+Then, explore the data structure
+
+    str(mtcars)
+
+```{r}
+str(mtcars)
+```
+
+According to the output above, we can say that the data set 32 observation and 11 variables where all of them are considered as numerical.
+
+Calculate the five number summary of the variables.
+
+    summary(mtcars)
+
+```{r}
+summary(mtcars)
+```
+
+Then, observe the relationship among the variables visually at first.
+
+    library(car)
+    scatterplotMatrix(mtcars,diagonal = "histogram")
+
+```{r,warning=FALSE,message=FALSE,error=FALSE}
+library(car)
+scatterplotMatrix(mtcars,diagonal = "histogram")
+```
+
+We can say that the 2nd, 8th, 9th, 10th and 11th variables are factor, so we will omit them for a while and put a side since we will use them later.
+Then, draw the same plot again.
+
+    my_data<-mtcars[,-c(2,8:11)]
+    dim(my_data) # now we have 6 variables
+
+```{r}
+my_data<-mtcars[,-c(2,8:11)]
+dim(my_data) # now we have 6 variables
+```
+
+    scatterplotMatrix(my_data, diagonal="histogram")
+
+```{r,warning=FALSE,message=FALSE,error=FALSE}
+scatterplotMatrix(my_data, diagonal="histogram")
+```
+
+It is seen that there is a strong correlation among the numerical variables in the data which is very suitable condition for PCA.
+
+Instead of this visualization, you can use alternative ways to represent the correlation among the numerical variables in the dataset.
+
+    res <- cor(my_data, method="pearson")
+    corrplot::corrplot(res, method= "color", order = "hclust")
+
+```{r}
+res <- cor(my_data, method="pearson")
+corrplot::corrplot(res, method= "color", order = "hclust")
+```
+
+When we look at the first plot (including both density and scatter plots) we can observe that the scale of the variables are different, and this can cause a problem in PCA.
+Therefore, we need to scale them via
+
+**Note that we will scale only numerical variables!**
+
+    my_data<-scale(my_data)
+    my_data
+
+```{r}
+my_data<-scale(my_data)
+my_data
+```
+
+The first step of PCA is to calculate the covariance and correlation matrix.
+Since our data set is scaled in this example, it' s enough to calculate one of them because they are equal.
+
+    cor(my_data)
+
+```{r}
+cor(my_data)
+```
+
+We can apply PCA using `prcomp()`.
+This function performs a principal components analysis on the given data matrix and returns the results as an object of class prcomp.
+
+However, be careful!
+We can conduct principal component regression in the following step.
+That's why, we will put our response variable mpg put a side.
+
+    my_data1<-my_data[,-1]
+
+```{r}
+my_data1<-my_data[,-1]
+```
+
+##### Code and Summary
+
+**Code**
+
+    pca1 <- prcomp(my_data1)
+
+```{r}
+pca1 <- prcomp(my_data1)
+```
+
+**Summary**
+
+    summary(pca1)
+
+```{r}
+summary(pca1)
+```
+
+The summary function on the result object gives us standard deviation, proportion of variance explained by each principal component, and the cumulative proportion of variance explained.
+For example, we can see that the first three components explain the 96.12% variability in data which is very good.
+
+We can also use names function to find the name of the variables in the result object.
+
+    names(pca1)
+
+```{r}
+names(pca1)
+```
+
+We see that the resulting object has 5 variables.
+The principal components of interest are stored in x object.
+It will be of the same dimension as our data used for PCA.
+Here each column is Principal Component.
+
+**`prcomp` Output**
+
+**Z=XV-both give the same output**
+
+    library(dplyr)
+    pca1$x %>% head(6)  #Z matrix 
+
+```{r}
+library(dplyr)
+pca1$x %>% head(6)  #Z matrix 
+```
+
+    as.matrix(my_data1)%*%as.matrix(pca1$rotation) %>% head(6) #XV matrix
+
+```{r}
+as.matrix(my_data1)%*%as.matrix(pca1$rotation) %>% head(6) #XV matrix
+```
+
+**V Matrix-Eigenvectors**
+
+    pca1$rotation
+
+```{r}
+pca1$rotation
+```
+
+**Z matrix- Each column is a principal component**
+
+    pca1$x
+
+```{r}
+pca1$x
+```
+
+**Eigenvalues**
+
+    pca1$sdev
+
+```{r}
+pca1$sdev
+```
+
+Now, we obtain the all components for the data.
+After this step, we should decide how many components should we include in our analysis.
+The way of making such a decision is to look at the contribution of the each component to cumulative proportion.
+However, it is sometimes difficult to decide for this number.
+In this case, we will use a visual way, scree plot, which is a line plot of the eigenvalues of factors or principal components in an analysis.
+
+    library(factoextra) #produce ggplot graphs
+    fviz_eig(pca1,addlabels=TRUE) #represent the proportion values
+
+```{r,warning=F,message=FALSE}
+library(factoextra) #produce ggplot graphs
+fviz_eig(pca1,addlabels=TRUE) #represent the proportion values
+```
+
+As you see, 3 components seems OK.
+When we look at the summary output, we see that first 3 components explain the almost 94.5% of the variability which is so good as stated above.
+
+Now, Lets extract first 3 components and continue our analysis with them.
+
+    pca<-pca1$x[,1:3]
+    #I write index numbers for column part
+    head(pca)
+
+```{r}
+pca<-pca1$x[,1:3]
+#I write index numbers for column part
+head(pca)
+```
+
+We would like to be sure that our components should be orthogonal.
+In other words, they must be linearly independent.
+To check this, draw the correlation plot of the pca's.
+
+    res1 <- cor(pca, method="pearson")
+    corrplot::corrplot(res1, method= "color", order = "hclust")
+
+```{r}
+res1 <- cor(pca, method="pearson")
+corrplot::corrplot(res1, method= "color", order = "hclust")
+```
+
+As you see, all components are linearly independent.
+
+**Interpretation of Components**
+
+Interpretation of principal components is still a heavily researched topic in statistics, and although the components may be readily interpreted in most settings, this is not always the case (Joliffe, 2002).
+
+    cor(my_data1,pca)
+
+```{r}
+cor(my_data1,pca)
+```
+
+The PCs can then be interpreted based on which variables they are most correlated in either a positive or negative direction.
+The level at which the correlations are significant is left to the researcher.
+
+The first component is positively correlated with disp, hp, and wt.
+This correlation suggests the four variables vary together and when one goes down, the others decrease as well.
+The component is most correlated with disp at .0.96 and could be considered as primarily a measure of disp.
+
+After this step, it's time to plot your PCA.
+You will make a biplot, which includes both the position of each sample in terms of PC1 and PC2 and also will show you how the initial variables map onto this.
+A biplot is a type of plot that will allow you to visualize how the samples relate to one another in our PCA (which samples are similar and which are different) and will simultaneously reveal how each variable contributes to each principal component.
+In other words, it is presenting how strongly a loading of a given variable contributes to a given principal component.
+
+#### **Loading Plots**
+
+**PC1-PC2**
+
+    fviz_pca_var(pca1,axes = c(1, 2))
+
+```{r}
+fviz_pca_var(pca1,axes = c(1, 2))
+```
+
+**PC2-PC3**
+
+    fviz_pca_var(pca1,axes = c(2, 3))
+
+```{r}
+fviz_pca_var(pca1,axes = c(2, 3))
+```
+
+Lets consider plot for **PC1-PC2**.
+
+In this plot, the axes are seen as arrows originating from the center point.
+Their project values on each PC show how much weight they have on that PC.
+In this example, hp, disp, wt strongly influence PC1, while qsew and drat have more say in PC2.
+
+Another nice thing about loading plots: the angles between the vectors tell us how characteristics correlate with one another.
+Lets look at Figure 1.
+When two vectors are close, forming a small angle, the two variables they represent are positively correlated.
+Example: hp and disp.
+
+We can also compare the contribution of the variables to the components visually.
+
+    fviz_pca_var(pca1, col.var = "contrib")+ scale_color_gradient2( low="red", mid="green",
+    high="blue", midpoint=96, space = "Lab")
+
+```{r}
+fviz_pca_var(pca1, col.var = "contrib")+ scale_color_gradient2( low="red", mid="green",
+high="blue", midpoint=96, space = "Lab")
+```
+
+Show the ones being the first three variable with high contribution
+
+    fviz_pca_var(pca1, select.var = list(contrib = 3))
+
+```{r}
+fviz_pca_var(pca1, select.var = list(contrib = 3))
+```
+
+qsec, disp and hp are the first three variables having the highest contribution to the first two components.
+
+We can also observe the which components is good in the explanation of the cases.
+
+    fviz_pca_ind(pca1, col.ind = "#00AFBB")
+
+```{r}
+fviz_pca_ind(pca1, col.ind = "#00AFBB")
+```
+
+Lİncoln Continental is explained by PC1 and Ferrari Dino is explained by PC2.
+
+You can also visualize the contribution of the individuals to the components.
+For example, you can see that Honda Civic has the highest contribution to the first two components.
+
+    fviz_contrib(pca1, choice = "ind", axes = 1:2) + coord_flip()
+
+```{r}
+fviz_contrib(pca1, choice = "ind", axes = 1:2) + coord_flip()
+
+```
+
+We can also classify the observations with respect to one categorical variable.
+
+    fviz_pca_ind(pca1, label="none", habillage=mtcars$cyl,
+    addEllipses=TRUE, ellipse.level=0.95)
+
+```{r}
+fviz_pca_ind(pca1, label="none", habillage=mtcars$cyl,
+addEllipses=TRUE, ellipse.level=0.95)
+```
+
+**Bonus:**
+
+```{r}
+biplot(pca1, scale = 0)
+```
+
+This 2-D plot shows the car models.
+The car models being close to each other have the similar pattern.
+
+We can also make a connection between individuals and variables by looking at this plot.
+For example, Merc 230 valiant is the car model which has the most association with qsec.
+
+After all this step, Lets see what we have.
+
+-   Explaratory variables (PC's)
+
+-   Response variable.
+
+Therefore, we are ready for Principle Component Regression.
+
+In order to perform the regression, I am combining both the explanatory variables - PCs, and explained variable - y.
+In this moment the dimensionality reduction should take place.
+
+    ols.data <- data.frame(mpg=my_data[,1],pca)
+
+```{r}
+ols.data <- data.frame(mpg=my_data[,1],pca)
+```
+
+Using the lm function I perform the linear regression.
+The coefficient attribute contains values of 3 coefficients, denoted earlier as $Z$
+
+    lmodel <- lm(mpg ~ ., data = ols.data)
+    summary(lmodel)
+
+```{r}
+lmodel <- lm(mpg ~ ., data = ols.data)
+summary(lmodel)
+```
+
+As you see, the model is significant.
+Almost 80% of the variability of y can be explained by components.
+Also, we can say that the first component which has the highest variance explained is significant.
+
+You can check the performance of the model in the data by the performance criteria such as MSE or RMSE.
+
+    mean((ols.data$mpg - predict(lmodel))^2) #mse
+    # sqrt(mean((ols.data$mpg - predict(lmodel))^2)) : rmse 
+
+```{r}
+mean((ols.data$mpg - predict(lmodel))^2) #mse
+# sqrt(mean((ols.data$mpg - predict(lmodel))^2)) : rmse 
+```
+
+### **Factor Analysis**
+
+The factor analysis is another dimesion reduction technique mainly developed in the area of psychology.
+The objective of this technique is to describe covariance relationship among ($p$) versus in terms of a few ($m$) underlying and unobservable linear combinations called factors.
+
+The idea of this method is to group variables by their correlations.
+Variables in a group are correlated among them selves but uncorrelated to variables in different group.
+FA can be considered as an extension of PCA.
+In both, we attempt to examine the relationship among a set of variables.
+However, there are differences as well.
+
+In PCA, the major goal is to select a number of components that explain the as much as the total variance as possible.
+But factors in FA are selected mainly to explain the interrelations among the original variables.
+The major emphasis is placed on obtaining easily understandable factors that convey the essential information contained in the original dataset.
+
+**Example 2**
+
+Consider `bfi` dataset from `psych` package.
+It contains 25 personality self report items taken from the International Personality Item Pool (ipip.ori.org) were included as part of the Synthetic Aperture Personality Assessment (SAPA) web based personality assessment project.
+
+For more details type \`\`\`?b
+fi\`\`\`\`.
+
+    library(psych)#Loading the dataset
+    bfi_data=bfi
+    head(bfi)
+
+```{r,warning=FALSE,message=F}
+library(psych)#Loading the dataset
+bfi_data=bfi
+head(bfi)
+```
+
+Though we have NA values in our data which need to be handled but we will not perform much processing on the data.
+To make things simple, we will only take those data points where there are no missing values.
+
+    #Remove rows with missing values and keep only complete cases
+    bfi_data=bfi_data[complete.cases(bfi_data),]
+    dim(bfi_data)
+
+```{r}
+#Remove rows with missing values and keep only complete cases
+bfi_data=bfi_data[complete.cases(bfi_data),]
+dim(bfi_data)
+```
+
+This leaves us with 2236 data points down from 2800 which means a reduction of 564 data points.
+Since 2236 is still a plausible number of data points, we can proceed further.
+
+After checking the dimension, you can apply some descriptive analysis such as calculating summary numbers etc.
+It is your duty for this question.
+:)
+
+Instead, we will calculate and show the correlation in the data.
+
+    cm <- cor(bfi_data, method="pearson")
+    corrplot::corrplot(cm, method= "number", order = "hclust")
+
+```{r}
+cm <- cor(bfi_data, method="pearson")
+corrplot::corrplot(cm, method= "number", order = "hclust")
+```
+
+Since we have lots of variables the figure above is not a clear one, but still, we can observe that there are some correlated variables.
+
+Now lets check the factorability of the variables in the dataset.
+First, lets create a new dataset by taking a subset of all the independent variables in the data and perform the Kaiser-Meyer-Olkin (KMO) Test.
+
+    KMO(r=cm)
+
+```{r}
+KMO(r=cm)
+```
+
+Since MSA \> 0.5, we can run Factor Analysis on this data.
+Besides, Bartletts test of sphericity should be significant.
+
+    print(cortest.bartlett(cm,nrow(bfi_data)))
+
+```{r}
+print(cortest.bartlett(cm,nrow(bfi_data)))
+```
+
+The Kaiser-Meyer Olkin (KMO) and Bartletts Test measure of sampling adequacy were used to examine the appropriateness of Factor Analysis.
+The approximate of Chi-square is 17331.21 with 378 degrees of freedom, which is significant at 0.05 Level of significance.
+The KMO statistic of 0.84 is also large (greater than 0.50).
+Hence Factor Analysis is considered as an appropriate technique for further analysis of the data.
+
+Then, we should decide number of factors and there are several way to do it.
+We can use visual ways or formal ways.
+Lets try both.
+
+The scree plot,which graphs the Eigenvalue against each factor, is used to determine number of factors visually.
+To draw it, we will use
+
+    library(psych)
+    parallel <- fa.parallel(bfi_data, fm = "minres", fa = "fa")
+    parallel
+
+```{r,warning=FALSE,message=F}
+library(psych)
+parallel <- fa.parallel(bfi_data, fm = "minres", fa = "fa")
+parallel
+```
+
+We can see from the graph that after factor 7 there is a sharp change in the curvature of the scree plot.
+This shows that after factor 7 the total variance accounts for smaller amounts.
+
+Selection of factors from the scree plot can be based on: 1.
+Kaiser-Guttman normalization rule says that we should choose all factors with an eigenvalue greater than 1.
+2.
+Bend elbow rule
+
+Lets see whether 7 factor is enough to group the variables.
+To do so, we will use `factanal` function and test the null hypothesis that 7 factors are sufficient.
+This function also helps us to conduct factor analysis in R.
+It performs maximum-likelihood factor analysis on a covariance matrix or data matrix.
+The number of factors to be fitted is specified by the argument factors.
+Further, the factor scores may be calculated either by using Thompsons estimator or Bartletts weighted least-squares scores method.
+The particular method is specified by an additional argument scores = "regression" or scores = "Bartlett".
+Moreover, by the additional argument rotation the transformation of the factors may be specified by either `rotation = varimax` for orthogonal rotation, `rotation = Bartlett` for oblique rotation or `rotation = none`
+
+**Note: You can consider different packages and functions for this analysis.**
+
+    factanal(bfi_data, factors = 7, method ="mle")$PVAL
+
+```{r}
+factanal(bfi_data, factors = 7, method ="mle")$PVAL
+```
+
+Since p value is less than $\alpha$, we reject $H_0$.
+Lets try a case where we have 16 factors.
+
+    factanal(bfi_data, factors = 16, method ="mle")$PVAL
+
+```{r}
+factanal(bfi_data, factors = 16, method ="mle")$PVAL
+```
+
+This time, since p value is greater than 0.05, we fail to reject null hypothesis and decide on that 16 factor solution is adequate.
+
+The 16-factor solution is as follows() note that the solution is that resulting from a varimax solution.
+In other words, it will calculate the factors using `varimax` rotation.
+You can consider other rotations by changing the `rotation`argument in the funciton.
+
+    f<-factanal(bfi_data, factors = 16, method ="mle")
+    f
+
+```{r}
+f<-factanal(bfi_data, factors = 16, method ="mle")
+f
+```
+
+Varimax solution or rotation enables us to interpret the factor loadings.
+For example, the first factor is dominated by the N1 and N2, which are "Get angry easily and Get irritated easily" questions.
+Second factor reflects A3 which is "Know how to comfort others." question.
+
+Also, we can see that the first 16 factors have an Eigenvalue \>1 and which explains almost 56% of the variance.
+We can effectively reduce dimensionality from 28 to 11 while only losing about 44% of the variance.
+Factor 1 accounts for 9.2% of the variance; Factor 2 accounts for 7.3% of the variance and goes like this,.
+All the 16 factors together explain for 56% of the variance in performance as written above.
+
+    load <- f$loadings[,1:2]
+    plot(load,type="n") # set up plot
+    text(load,labels=names(bfi_data),cex=.7)
+
+```{r}
+load <- f$loadings[,1:2]
+plot(load,type="n") # set up plot
+text(load,labels=names(bfi_data),cex=.7)
+```
+
+You can also visualize the factor model to ease your interpretation.
+As we stated above, the N type questions dominate the Factor 1, while A type questions dominate the Factor 2.
+From there, you can decide whether there are any variables that do not load sufficiently well onto any of the factors if the $|loading|<0.4$
+
+The question is asking about the coherence or internal consistency of the variables within a factor when used together.
+One way to measure this is through a measure called "alpha," developed by Cronbach.
+Alpha is a widely used measure of internal consistency, and it can be used by specifying which variables belong to each factor.
+The goal is to determine whether the variables within a factor form a coherent whole and are internally consistent with each other.
+
+To run alpha on your factors you will first need to specify which variables belong to each factor.
+Let's check the consistency of the first factor.
+
+    names(f$loadings[,1])[abs(f$loadings[,1])>0.4]
+
+```{r}
+names(f$loadings[,1])[abs(f$loadings[,1])>0.4]
+```
+
+    f1<-bfi_data[,names(f$loadings[,1])[abs(f$loadings[,1])>0.4]] 
+
+```{r}
+f1<-bfi_data[,names(f$loadings[,1])[abs(f$loadings[,1])>0.4]] 
+```
+
+Once you have defined each of the factors you can use that information to run the analysis.
+
+Cronbach's alpha is a measure of internal consistency that ranges from zero to 1.0, similar to positive correlation values.
+It is possible for alpha to take a value greater than 1.0 if two or more variables in the set are highly correlated, in which case you may want to check for collinearity.
+In general, a value of alpha greater than 0.70 is considered acceptable for internal consistency, but a value of alpha greater than 0.80 is preferred.
+The function for calculating alpha can be found in the psych library and is relatively easy to use.
+
+    alpha(f1, check.keys=TRUE) 
+
+```{r}
+alpha(f1, check.keys=TRUE) 
+```
+
+`check.keys`argument prevents the factor from the variables that may impact the factor negatively.
+
+    summary(alpha(f1, check.keys=TRUE))
+
+```{r}
+summary(alpha(f1, check.keys=TRUE))
+```
+
+We are concerned with the "raw-alpha" value for the entire factor.
+That tells us, overall, how consistent the variables are within the factor.
+Here, the alpha is 0.82.
+That is pretty good.
+
+You can repeat this process for the rest of the factors.
+
+After determining your factors, you can use them in the further steps of your analysis for example as independent observations in your regression.
+While doing this, your variables should be factor scores which are basically equal to $LF$ where $L$ is the factor loadings and $F$ is the common predictors (variables in the factors)
+
+In other words, we can obtain the estimated factor scores for individuals.
+
+How to obtain them?
+
+    scores<-factanal(bfi_data, factors = 16, method ="mle",scores="regression")$scores
+    head(scores)
+
+```{r}
+scores<-factanal(bfi_data, factors = 16, method ="mle",scores="regression")$scores
+head(scores)
+```
+
+    cm1 <- cor(scores, method="pearson")
+    corrplot::corrplot(cm1, method= "number", order = "hclust")
+
+```{r}
+cm1 <- cor(scores, method="pearson")
+corrplot::corrplot(cm1, method= "number", order = "hclust")
+```
+
+As you see, they are almost uncorrelated which guarantees that no multicollinearity problem in linear regression.
+
+## Exercise
+
+Consider `mtcars` dataset.
+Then, remove mpg variable from the data which is your response.
+
+```{r e1, exercise=TRUE}
+
+```
+
+After that, check whether the dataset you have is suitable for the factor analysis or not.
+
+```{r e2, exercise=TRUE}
+
+```
+
+If it's suitable, determine the factor number via formal way and obtain the scores.
+
+```{r e3, exercise=TRUE}
+
+```
+
+```{r e4, exercise=TRUE}
+
+```
+
+```{r e5, exercise=TRUE}
+
+```
+
+Then, fit a linear regression where mpg is our response and compare it with the one in exercise 1 (pcr) in terms of MSE.
+
+```{r e6, exercise=TRUE}
+
+```
+
+```{r e7, exercise=TRUE}
+
+```
+
+```{r e8, exercise=TRUE}
+
+```
+
+Write the R code required to add two plus two:
+
+```{r two-plus-two, exercise=TRUE}
+
+```
+
+
+**I wish you a bright new year**
+
+![](images/paste-889BAB05.png)
+
+
+
+### Quiz
+
+Send your favorite song to ozanstat@gmail.com with your name and surname until 23.59. 
