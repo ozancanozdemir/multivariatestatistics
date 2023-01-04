@@ -5,13 +5,13 @@ This repository involves the tutorials about the multivariate statistical analys
 To install the package to your R enviroment.
 
 ```
-remotes::install_github("ozancanozdemir/stat467")
+remotes::install_github("ozancanozdemir/multivariatestatistics")
 ```
 Then, run the following command to open the interactive tutorial page.  For example, 
 
 ```
 library(stat467)
-learnr::run_tutorial("Recitation3",package = "stat467")
+learnr::run_tutorial("Recitation3",package = "multivariatestatistics")
 ```
 
 The content of the tutorials are given below. 
@@ -30,3 +30,11 @@ The content of the tutorials are given below.
 > Two independent samples Hotelling $T^2$
 > One way MANOVA
 + Multivariate Multiple Linear Regression 
+
+### Recitation 11 
+
++ Dimesion reduction techniques 
+
+> Principal Component
+> Principal Component Regression 
+> Factor Analysis 
