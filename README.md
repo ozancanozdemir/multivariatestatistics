@@ -5,13 +5,13 @@ This repository involves the tutorials about the multivariate statistical analys
 To install the package to your R enviroment.
 
 ```
-remotes::install_github("ozancanozdemir/multivariatestatistics")
+remotes::install_github("ozancanozdemir/stat467")
 ```
 Then, run the following command to open the interactive tutorial page.  For example, 
 
 ```
 library(stat467)
-learnr::run_tutorial("Recitation3",package = "multivariatestatistics")
+learnr::run_tutorial("Recitation3",package = "stat467")
 ```
 
 The content of the tutorials are given below. 
@@ -38,3 +38,8 @@ The content of the tutorials are given below.
 > Principal Component
 > Principal Component Regression 
 > Factor Analysis 
+
+### Recitation 14
+
++ Linear Discrimination Analysis
+
